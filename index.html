@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Créditos fiscales Rustik</title>
+<style>
+  :root { --fondo:#f6f3ee; --papel:#fff; --tinta:#241f1a; --suave:#6b625a; --linea:#e2dbd1; --marca:#8a3b12; --marca-clara:#f3e3d8; --ok:#1d6b3a; --aviso:#a05a00; --error:#a3261c; }
+  @media (prefers-color-scheme: dark) { :root { --fondo:#17140f; --papel:#201c16; --tinta:#f1ebe2; --suave:#a89d90; --linea:#38322a; --marca:#e08a54; --marca-clara:#3a2619; --ok:#5fcf8a; --aviso:#e8b058; --error:#ff8a80; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--fondo); color:var(--tinta); font:16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:20px 16px 90px; }
+  h1 { font-size:1.35rem; margin:0 0 4px; }
+  .sub { color:var(--suave); margin:0 0 18px; font-size:.95rem; }
+  .caja { background:var(--papel); border:1px solid var(--linea); border-radius:12px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:.85rem; color:var(--suave); margin-bottom:4px; }
+  input[type=password], input[type=text], input[type=date], select { width:100%; font:inherit; color:inherit; background:var(--fondo); border:1px solid var(--linea); border-radius:8px; padding:9px 10px; }
+  button { font:inherit; cursor:pointer; border-radius:8px; border:1px solid var(--marca); background:var(--marca); color:#fff; padding:9px 14px; }
+  button.claro { background:transparent; color:var(--marca); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  #entrada { max-width:420px; margin:12vh auto 0; }
+  #entrada button { width:100%; margin-top:12px; }
+  .mensaje { margin-top:10px; font-size:.92rem; min-height:1.3em; }
+  .mensaje.error { color:var(--error); } .mensaje.ok { color:var(--ok); }
+  .filtros { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; align-items:end; }
+  .atajos { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .barra { position:sticky; bottom:0; background:var(--papel); border-top:1px solid var(--linea); padding:12px 16px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; justify-content:space-between; }
+  .totales { font-size:.95rem; } .totales b { font-size:1.05rem; }
+  .acciones { display:flex; gap:8px; flex-wrap:wrap; }
+  .tabla { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; min-width:720px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--linea); font-size:.92rem; vertical-align:top; }
+  th { font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--suave); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  td.sd { color:var(--aviso); font-style:italic; }
+  tr.marcada { background:var(--marca-clara); }
+  .aviso { color:var(--aviso); font-size:.82rem; display:block; }
+  input[type=checkbox] { width:18px; height:18px; accent-color:var(--marca); }
+  .vacio { padding:26px; text-align:center; color:var(--suave); }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <section id="entrada" class="caja">
+    <h1>Créditos fiscales Rustik</h1>
+    <p class="sub">Escribe la clave para ver los créditos.</p>
+    <label for="clave">Clave</label>
+    <input id="clave" type="password" autocomplete="current-password" autofocus>
+    <button id="entrar" type="button">Entrar</button>
+    <div id="msgEntrada" class="mensaje" role="status"></div>
+  </section>
+
+  <section id="app" hidden>
+    <h1>Créditos fiscales Rustik</h1>
+    <p class="sub" id="actualizado"></p>
+
+    <div class="caja">
+      <div class="filtros">
+        <div><label for="desde">Desde (opcional)</label><input id="desde" type="date"></div>
+        <div><label for="hasta">Hasta (opcional)</label><input id="hasta" type="date"></div>
+        <div><label for="empresa">Empresa (opcional)</label><select id="empresa"><option value="">Todas</option></select></div>
+        <div><label for="texto">Buscar (opcional)</label><input id="texto" type="text" placeholder="número, NIT o nombre"></div>
+      </div>
+      <div class="atajos">
+        <button class="claro" id="mesAnt" type="button">Mes anterior</button>
+        <button class="claro" id="todo" type="button">Ver todo</button>
+      </div>
+    </div>
+
+    <div class="caja tabla">
+      <table>
+        <thead><tr>
+          <th><input type="checkbox" id="todos" aria-label="Marcar todos los que se ven"></th>
+          <th>Fecha</th><th>Empresa</th><th>N.º de control</th><th class="num">Neto</th><th class="num">IVA</th><th class="num">Total</th>
+        </tr></thead>
+        <tbody id="filas"></tbody>
+      </table>
+      <div id="vacio" class="vacio" hidden>No hay créditos con esos filtros.</div>
+    </div>
+  </section>
+</main>
+
+<div class="barra" id="barra" hidden>
+  <div class="totales" id="totales"></div>
+  <div class="acciones">
+    <div id="msgAccion" class="mensaje" role="status" style="margin:0 8px 0 0"></div>
+    <button class="claro" id="bajarCsv" type="button">Bajar lista (hoja de cálculo)</button>
+    <button id="bajarZip" type="button" disabled>Descargar PDF marcados</button>
+  </div>
+</div>
+
+<script src="nucleo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
